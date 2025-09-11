@@ -1,0 +1,15 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Muskan Chauhan",
+  "license": "ISC",
+  "description": "docker-containerization-project",
+  "dependencies": {
+    "express.js": "^1.0.0",
+    "xlsx": "^0.18.5"
+  }
+}
