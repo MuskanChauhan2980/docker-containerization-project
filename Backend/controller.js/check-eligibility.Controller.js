@@ -1,5 +1,6 @@
-const { Customer, Loan } = require("./Database/db.js");
+const { Customer, Loan } = require("../Database/db");
 const { Op } = require("sequelize");
+const express= require("express");
 const router = express.Router();
 
 // Utility: EMI calculation
