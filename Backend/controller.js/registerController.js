@@ -1,7 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const { Customer } = require("./db");
-
+const router = express.Router();
 const app = express();
 app.use(bodyParser.json());
 
@@ -10,8 +10,8 @@ function roundToNearestLakh(amount) {
   return Math.round(amount / 100000) * 100000;
 }
 
-// 🔹 Register API
-app.post("/register", async (req, res) => {
+ 
+router.post("/register", async (req, res) => {
   try {
     const { first_name, last_name, age, monthly_income, phone_number } = req.body;
 
@@ -63,7 +63,4 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// Start server
-app.listen(3000, () => {
-  console.log("🚀 Server running on http://localhost:3000");
-});
+ module.exports=router;
