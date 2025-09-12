@@ -4,6 +4,6 @@ const { LoanExcel } = require("../Database/db");
 
 const viewLoanByCustomerId = require("../controller.js/viiew-loanCustomerController");
 
-router.get("/view-loans/customer_id",viewLoanByCustomerId);
+router.get("/view-loans/:customer_id",viewLoanByCustomerId);
 
 module.exports= router
