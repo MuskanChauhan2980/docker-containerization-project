@@ -51,7 +51,7 @@ const CustomerExcel = sequelize.define("CustomerExcel", {
 
 // ------------------ LoanExcel ------------------
 const LoanExcel = sequelize.define("LoanExcel", {
-  loan_id: { type: DataTypes.INTEGER, primaryKey: true },
+  loan_id: { type: DataTypes.INTEGER, primaryKey: true,autoIncrement: true, },
   customer_id: { type: DataTypes.INTEGER, allowNull: false },
   loan_amount: { type: DataTypes.FLOAT, allowNull: false },
   tenure: { type: DataTypes.INTEGER, allowNull: false },
@@ -68,6 +68,9 @@ const LoanExcel = sequelize.define("LoanExcel", {
 // ------------------ Relationships ------------------
 Customer.hasMany(Loan, { foreignKey: "customer_id" });
 Loan.belongsTo(Customer, { foreignKey: "customer_id" });
+
+CustomerExcel.hasMany(LoanExcel, { foreignKey: "customer_id" });
+LoanExcel.belongsTo(CustomerExcel, { foreignKey: "customer_id" });
 
 // ------------------ Sync DB ------------------
 sequelize.sync({ alter: true })  // use { force: true } only in dev
