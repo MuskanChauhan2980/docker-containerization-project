@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { LoanExcel, CustomerExcel } = require("../Database/db"); // adjust your import
+const { Loan, Customer } = require("../Database/db"); // use real tables
 
 // Utility function for EMI calculation
 function calculateEMI(principal, rate, tenure) {
@@ -15,8 +15,8 @@ router.post("/create-loan", async (req, res) => {
   try {
     const { customer_id, loan_amount, interest_rate, tenure } = req.body;
 
-    // 1. Check if customer exists
-    const customer = await CustomerExcel.findByPk(customer_id);
+    // 1. Check if customer exists in real Customer table
+    const customer = await Customer.findByPk(customer_id);
     if (!customer) {
       return res.status(404).json({
         loan_id: null,
@@ -27,7 +27,7 @@ router.post("/create-loan", async (req, res) => {
       });
     }
 
-    // 2. Check eligibility (simple example: requested <= approved_limit)
+    // 2. Eligibility check (requested <= approved_limit)
     if (loan_amount > customer.approved_limit) {
       return res.status(400).json({
         loan_id: null,
@@ -38,28 +38,28 @@ router.post("/create-loan", async (req, res) => {
       });
     }
 
-    // 3. Calculate monthly installment
+    // 3. Calculate EMI
     const monthly_installment = calculateEMI(
       loan_amount,
       interest_rate,
       tenure
     );
 
-    // 4. Create loan entry
-    const loan = await LoanExcel.create({
+    // 4. Create loan entry in Loan table
+    const loan = await Loan.create({
       customer_id,
       loan_amount,
       tenure,
       interest_rate,
-      monthly_payment: monthly_installment,
+      monthly_installment,
       EMIs_paid_on_time: 0,
       date_of_approval: new Date(),
       end_date: new Date(new Date().setMonth(new Date().getMonth() + tenure)),
     });
 
-    // 5. Return response
+    // 5. Respond with loan details
     return res.json({
-      loan_id: loan.loan_id,
+      loan_id: loan.loan_id, // should auto increment now
       customer_id,
       loan_approved: true,
       message: "Loan approved successfully",
