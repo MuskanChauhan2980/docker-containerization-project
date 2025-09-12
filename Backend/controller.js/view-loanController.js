@@ -3,7 +3,7 @@ const router = express.Router();
 const { LoanExcel, CustomerExcel } = require("../Database/db");
 
 // 📌 View Loan Details with Customer Info (from Excel data)
-router.get("/view-loan/:loan_id", async (req, res) => {
+ const viewLoanByLoanId = async (req, res) => {
   try {
     const { loan_id } = req.params;
 
@@ -25,7 +25,7 @@ router.get("/view-loan/:loan_id", async (req, res) => {
     // Format response
     return res.json({
       loan_id: loan.loan_id,
-      customer: loan.CustomerExcel, // ✅ contains customer info
+      customer: loan.CustomerExcel,  
       loan_amount: loan.loan_amount,
       interest_rate: loan.interest_rate,
       monthly_installment: loan.monthly_payment,
@@ -33,10 +33,10 @@ router.get("/view-loan/:loan_id", async (req, res) => {
     });
 
   } catch (err) {
-    console.error("❌ Error fetching loan:", err);
+    console.error("Error fetching loan:", err);
     res.status(500).json({ message: "Server error" });
   }
-});
+};
 
-module.exports = router;
+module.exports =  viewLoanByLoanId;
 

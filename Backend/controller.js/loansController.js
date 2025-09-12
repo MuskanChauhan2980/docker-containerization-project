@@ -11,7 +11,7 @@ function calculateEMI(principal, rate, tenure) {
   );
 }
 
-router.post("/create-loan", async (req, res) => {
+const createLoan= async (req, res) => {
   try {
     const { customer_id, loan_amount, interest_rate, tenure } = req.body;
 
@@ -75,6 +75,6 @@ router.post("/create-loan", async (req, res) => {
       monthly_installment: null,
     });
   }
-});
+}
 
-module.exports = router;
+module.exports = createLoan;

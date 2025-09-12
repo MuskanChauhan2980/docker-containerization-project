@@ -3,7 +3,7 @@ const router = express.Router();
 const { LoanExcel } = require("../Database/db");
 
 // 📌 Get all loans for a customer
-router.get("/view-loans/:customer_id", async (req, res) => {
+ const viewLoanByCustomerId= async (req, res) => {
   try {
     const { customer_id } = req.params;
 
@@ -29,6 +29,6 @@ router.get("/view-loans/:customer_id", async (req, res) => {
     console.error("Error fetching loans:", err);
     res.status(500).json({ message: "Server error" });
   }
-});
+};
 
-module.exports = router;
+module.exports = viewLoanByCustomerId ;

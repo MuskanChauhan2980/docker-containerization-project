@@ -11,7 +11,7 @@ function roundToNearestLakh(amount) {
 }
 
  
-router.post("/register", async (req, res) => {
+ const register  = async (req, res) => {
   try {
     const { first_name, last_name, age, monthly_income, phone_number } = req.body;
 
@@ -61,6 +61,6 @@ router.post("/register", async (req, res) => {
 
     return res.status(500).json({ error: "Internal Server Error" });
   }
-});
+}
 
- module.exports=router;
+ module.exports= register ;

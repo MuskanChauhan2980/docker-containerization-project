@@ -11,7 +11,7 @@ function calculateEMI(principal,rate,tenure){
   )
 }
 
-router.post("/check-eligibility", async (req, res) => {
+ const checkEligibility = async (req, res) => {
   try {
     const { customer_id, loan_amount, interest_rate, tenure } = req.body;
 
@@ -108,6 +108,6 @@ router.post("/check-eligibility", async (req, res) => {
     console.error("❌ Eligibility check error:", err);
     res.status(500).json({ message: "Server error" });
   }
-});
+}
 
-module.exports = router;
+module.exports =  checkEligibility ;
