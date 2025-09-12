@@ -1,116 +1,113 @@
-const { Customer, Loan } = require("../Database/db");
-const { Op } = require("sequelize");
-const express= require("express");
-const router = express.Router();
+const express = require("express");
+const router= express.Router();
+const {CustomerExcel,LoanExcel} = require("../Database/db");
 
-// Utility: EMI calculation
-function calculateEMI(P, annualRate, N) {
-  let R = annualRate / (12 * 100); // monthly interest rate
-  return (P * R * Math.pow(1 + R, N)) / (Math.pow(1 + R, N) - 1);
-}
 
-// Utility: Credit Score calculation
-async function calculateCreditScore(customer_id, approved_limit) {
-  const loans = await Loan.findAll({ where: { customer_id } });
-
-  if (!loans.length) return 50; // no history → neutral score
-
-  let score = 100;
-
-  // Past loans paid on time (dummy rule: closed loans add points)
-  const closedLoans = loans.filter((l) => l.status === "closed").length;
-  score += closedLoans * 2;
-
-  // Number of loans taken in past (penalty)
-  score -= loans.length * 2;
-
-  // Loan activity in current year
-  const currentYear = new Date().getFullYear();
-  const thisYearLoans = loans.filter(
-    (l) => new Date(l.start_date).getFullYear() === currentYear
-  ).length;
-  score -= thisYearLoans * 5;
-
-  // Loan approved volume penalty
-  const totalLoanVolume = loans.reduce((sum, l) => sum + l.loan_amount, 0);
-  if (totalLoanVolume > approved_limit) score -= 30;
-
-  // If current debt > approved limit → credit score = 0
-  const activeLoans = loans.filter((l) => l.status === "active");
-  const activeDebt = activeLoans.reduce((sum, l) => sum + l.loan_amount, 0);
-  if (activeDebt > approved_limit) score = 0;
-
-  return Math.max(score, 0);
+function calculateEMI(principal,rate,tenure){
+  const monthlyRate= rate/(12*100);
+  return(
+    principal*monthlyRate*Math.pow(1+monthlyRate,tenure)/
+    (Math.pow(1+monthlyRate,tenure) -1 )
+  )
 }
 
 router.post("/check-eligibility", async (req, res) => {
   try {
     const { customer_id, loan_amount, interest_rate, tenure } = req.body;
 
-    // Validate request
-    if (!customer_id || !loan_amount || !interest_rate || !tenure) {
-      return res.status(400).json({ error: "All fields are required." });
-    }
-
-    const customer = await Customer.findByPk(customer_id);
+    // 1. Get customer
+    const customer = await CustomerExcel.findByPk(customer_id);
     if (!customer) {
-      return res.status(404).json({ error: "Customer not found" });
+      return res.status(404).json({ message: "Customer not found" });
     }
 
-    // Calculate credit score
-    const credit_score = await calculateCreditScore(
-      customer_id,
-      customer.approved_limit
-    );
+    // 2. Get customer loans
+    const pastLoans = await LoanExcel.findAll({ where: { customer_id } });
+    let credit_score = 50; // base score
 
-    let approval = false;
-    let corrected_interest_rate = interest_rate;
+    // 3. Past loans paid on time
+    const onTimePayments = pastLoans.reduce((sum, loan) => sum + loan.EMIs_paid_on_time, 0);
+    credit_score += Math.min(onTimePayments * 2, 20);
 
-    // Loan approval logic
-    if (credit_score > 50) {
-      approval = true;
-    } else if (credit_score > 30) {
-      approval = true;
-      if (interest_rate < 12) corrected_interest_rate = 12;
-    } else if (credit_score > 10) {
-      approval = true;
-      if (interest_rate < 16) corrected_interest_rate = 16;
-    } else {
-      approval = false;
-    }
+    // 4. No of past loans
+    credit_score += pastLoans.length < 3 ? 10 : 5;
 
-    // EMI calculation
-    const monthly_installment = calculateEMI(
-      loan_amount,
-      corrected_interest_rate,
-      tenure
-    );
+    // 5. Loan activity this year
+    const thisYear = new Date().getFullYear();
+    const currentYearLoans = pastLoans.filter(
+      loan => new Date(loan.date_of_approval).getFullYear() === thisYear
+    ).length;
+    credit_score += currentYearLoans > 0 ? 5 : 0;
 
-    // Check if EMI burden > 50% of salary
-    const activeLoans = await Loan.findAll({
-      where: { customer_id, status: "active" },
-    });
-    const totalCurrentEMI = activeLoans.reduce(
-      (sum, l) => sum + l.monthly_installment,
+    // 6. Loan approved volume
+    const totalLoanVolume = pastLoans.reduce((sum, loan) => sum + loan.loan_amount, 0);
+    credit_score += totalLoanVolume > 50000 ? 10 : 5;
+
+    // 7. Check if active loans > approved limit
+    const activeLoanSum = pastLoans.reduce(
+      (sum, loan) => sum + (loan.status === "active" ? loan.loan_amount : 0),
       0
     );
-
-    if (totalCurrentEMI + monthly_installment > 0.5 * customer.monthly_income) {
-      approval = false;
+    if (activeLoanSum + loan_amount > customer.approved_limit) {
+      credit_score = 0;
     }
 
-    return res.status(200).json({
+    // 8. Check salary-to-EMI ratio
+    const currentEmis = pastLoans.reduce(
+      (sum, loan) => sum + (loan.status === "active" ? loan.monthly_payment : 0),
+      0
+    );
+    const newEmi = calculateEMI(loan_amount, interest_rate, tenure);
+    if ((currentEmis + newEmi) > 0.5 * customer.monthly_salary) {
+      return res.json({
+        customer_id,
+        approval: false,
+        interest_rate,
+        corrected_interest_rate: interest_rate,
+        tenure,
+        monthly_installment: null,
+        message: "Rejected: EMI exceeds 50% of salary"
+      });
+    }
+
+    // 9. Decide approval based on credit score
+    let approved = false;
+    let corrected_rate = interest_rate;
+
+    if (credit_score > 50) {
+      approved = true;
+    } else if (credit_score > 30) {
+      if (interest_rate >= 12) {
+        approved = true;
+      } else {
+        corrected_rate = 12;
+        approved = true;
+      }
+    } else if (credit_score > 10) {
+      if (interest_rate >= 16) {
+        approved = true;
+      } else {
+        corrected_rate = 16;
+        approved = true;
+      }
+    } else {
+      approved = false;
+    }
+
+    return res.json({
       customer_id,
-      approval,
+      approval: approved,
       interest_rate,
-      corrected_interest_rate,
+      corrected_interest_rate: corrected_rate,
       tenure,
-      monthly_installment: parseFloat(monthly_installment.toFixed(2)),
+      monthly_installment: approved ? calculateEMI(loan_amount, corrected_rate, tenure) : null,
+      credit_score
     });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Internal Server Error" });
+
+  } catch (err) {
+    console.error("❌ Eligibility check error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-module.exports= router
+module.exports = router;
