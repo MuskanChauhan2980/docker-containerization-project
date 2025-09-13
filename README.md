@@ -45,9 +45,9 @@ This project uses a `.env` file to manage database configuration and other secre
 
 ```env
 # Database Config
-DB_NAME=loan_system
-DB_USER=root
-DB_PASS=muskan!!!@00$
+DB_NAME= YOUR DB NAME
+DB_USER=ROOT
+DB_PASS=YOUR DB PASSWORD
 DB_HOST=localhost
 DB_DIALECT=mysql
 
