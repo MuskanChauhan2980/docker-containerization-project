@@ -1,7 +1,7 @@
 # 🚀 Loan & Customer Management API
 
 This project is a **Node.js + Express + MySQL backend API**, containerized with **Docker** and orchestrated using **Docker Compose**.  
-It allows you to register customers, check loan eligibility, and view loan details.  
+It allows you to register customers, check loan eligibility, and view loan details.
 
 ---
 
@@ -11,34 +11,36 @@ It allows you to register customers, check loan eligibility, and view loan detai
 ├── Database/ # Sequelize models & DB config
 ├── tests/ # Vitest + Supertest test cases
 ├── app.js # Express app entry
+|--- router/# api design for each router
 ├── Dockerfile # Docker image build file
 ├── docker-compose.yml # Compose setup (App + MySQL)
 └── README.md # Documentation
 
-
 ---
 
 ## ⚡ Features
-- Register customers with validation  
-- Check loan eligibility (with credit score calculation)  
-- View loan details with customer info  
-- JWT-based authentication (if enabled)  
-- Dockerized for easy setup  
-- Unit + Integration tests with **Vitest** & **Supertest**  
+
+- Register customers with validation
+- Check loan eligibility (with credit score calculation)
+- View loan details with customer info
+- Dockerized for easy setup
+- Unit + Integration tests with **Vitest** & **Supertest**
 
 ---
 
 ## 🛠️ Tech Stack
-- **Node.js** + **Express**  
-- **MySQL** + **Sequelize ORM**  
-- **Docker** + **Docker Compose**  
-- **Vitest** + **Supertest** for testing  
+
+- **Node.js** + **Express**
+- **MySQL** + **Sequelize ORM**
+- **Docker** + **Docker Compose**
+- **Vitest** + **Supertest** for testing
 
 ---
 
 ## 📦 Installation & Setup
 
 ### 1️⃣ Clone the repository
+
 ```bash
 git clone  https://github.com/MuskanChauhan2980/docker-containerization-project.git
 cd /Backend
@@ -46,7 +48,7 @@ cd /Backend
 
 API Endpoints (resquest and response)
 👤 Register Customer
-POST /register
+POST http://localhost:3000/register
 request:
 {
   "first_name": "Muskan",
@@ -70,7 +72,7 @@ Success Response:
 
 
 💳 Check Loan Eligibility
-POST /check-eligibility
+POST http://localhost:3000/check-eligibility
 request:
 {
   "customer_id": 1,
@@ -141,3 +143,6 @@ Response:
     "message": "Loan approved successfully",
     "monthly_installment": 4707.347222326467
 }
+
+🧪 Running Tests
+npx vitest --run
