@@ -24,9 +24,9 @@ async function importLoanData() {
     // ✅ Insert into MySQL table
     await LoanExcel.bulkCreate(formattedData,{ ignoreDuplicates: true });
 
-    console.log("✅ Loan data imported successfully!");
+    console.log("Loan data imported successfully!");
   } catch (err) {
-    console.error("❌ Error importing loan data:", err);
+    console.error("Error importing loan data:", err);
   }
 }
 

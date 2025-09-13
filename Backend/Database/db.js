@@ -1,9 +1,14 @@
 const { Sequelize, DataTypes } = require("sequelize");
 
-const sequelize = new Sequelize("loan_system", "root", "muskan!!!@00$", {
-  host: "localhost",
-  dialect: "mysql",
-});
+const sequelize = new Sequelize(
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASS,
+  {
+    host: process.env.DB_HOST,
+    dialect: process.env.DB_DIALECT,
+  }
+);
 
 // ------------------ Customer ------------------
 const Customer = sequelize.define("Customer", {
@@ -74,7 +79,7 @@ LoanExcel.belongsTo(CustomerExcel, { foreignKey: "customer_id" });
 
 // ------------------ Sync DB ------------------
 sequelize.sync({ alter: true })  // use { force: true } only in dev
-  .then(() => console.log("✅ Database & tables created/updated!"))
-  .catch((err) => console.error("❌ Error creating database:", err));
+  .then(() => console.log("Database & tables created/updated!"))
+  .catch((err) => console.error(" Error creating database:", err));
 
 module.exports = { sequelize, Customer, Loan, CustomerExcel, LoanExcel };

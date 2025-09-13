@@ -37,6 +37,22 @@ It allows you to register customers, check loan eligibility, and view loan detai
 
 ---
 
+## ⚙️ Environment Variables
+
+This project uses a `.env` file to manage database configuration and other secrets.  
+
+### 1️⃣ Create a `.env` file in the project root
+
+```env
+# Database Config
+DB_NAME=loan_system
+DB_USER=root
+DB_PASS=muskan!!!@00$
+DB_HOST=localhost
+DB_DIALECT=mysql
+
+---
+
 ## 📦 Installation & Setup
 
 ### 1️⃣ Clone the repository

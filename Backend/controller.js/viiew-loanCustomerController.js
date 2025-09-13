@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { LoanExcel } = require("../Database/db");
 
-// 📌 Get all loans for a customer
+//  Get all loans for a customer
  const viewLoanByCustomerId= async (req, res) => {
   try {
     const { customer_id } = req.params;

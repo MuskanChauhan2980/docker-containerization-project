@@ -19,9 +19,9 @@ async function importCustomerData() {
 
     await CustomerExcel.bulkCreate(formattedData, { ignoreDuplicates: true });
 
-    console.log("✅ Customer data imported successfully!");
+    console.log("Customer data imported successfully!");
   } catch (err) {
-    console.error("❌ Error importing customer data:", err);
+    console.error("Error importing customer data:", err);
   }
 }
 
